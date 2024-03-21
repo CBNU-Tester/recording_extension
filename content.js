@@ -1,13 +1,18 @@
-tmp()
-function tmp() {
-    document.addEventListener('click', function(event) {
-        handleElementClick(event)
-    });
-}
+/**
+ * extension의 record 버튼 클릭 시 실행되는 스크립트
+ * @todo 해당 클릭 이벤트 xpath 정보를 extension index.html에 전달
+ * @todo 해당 클릭 이벤트 xpath 정보를 서버에 전달
+ **/ 
+
+
+document.addEventListener('click', function(event) {
+    handleElementClick(event)
+});
+
+
 function handleElementClick(event) {
     var clickedElement = event.target;
     var xpath = getXPath(clickedElement);
-    console.log(xpath)
     make_box(xpath);
     
 }
@@ -25,6 +30,8 @@ function getXPath(element) {
             return getXPath(element.parentNode) + '/' + element.tagName + '[' + (i + 1) + ']';
     }
 }
+
+// 요소의 XPath를 표시하는 함수
 function make_box(xpath) {
     var blackBar = document.createElement('div');
     blackBar.style.position = 'fixed';
