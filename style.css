@@ -1,0 +1,50 @@
+.nav{
+    width: 100%;
+    background-color:#c0c2c9;
+    height: 30px;
+    width: 400px;
+    margin: 0 auto;/* border-radius: 15px 15px 0px 0px; */
+}
+
+.main-container{
+    text-align: center;
+    margin: 0 auto;
+    background-color:white;
+    width: 400px;
+    height: 300px;
+    padding: 0px;
+}
+
+.container{
+    padding: 0px;
+}
+
+.circle-group{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    padding-left: 10px;
+    gap: 5px;
+}
+.circle{
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+.circle:nth-child(1) {
+    background-color: rgb(233, 93, 82);
+}
+
+.circle:nth-child(2) {
+    background-color: rgb(244, 191, 79);
+}
+
+.circle:nth-child(3) {
+    background-color: rgb(98, 197, 84);
+}
+
+.table-header{
+    font-weight: bolder;
+    background: rgb(153, 152, 152);
+}
