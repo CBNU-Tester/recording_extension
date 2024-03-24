@@ -2,13 +2,16 @@
  * extension의 record 버튼 클릭 시 실행되는 스크립트
  * @todo 해당 클릭 이벤트 xpath 정보를 extension index.html에 전달
  * @todo 해당 클릭 이벤트 xpath 정보를 서버에 전달
- **/ 
-
-
-document.addEventListener('click', function(event) {
-    handleElementClick(event)
+ **/
+let valid=false; 
+chrome.storage.local.get(["script_valid"], (result) => {
+    valid = result.script_valid;
+    console.log("content js ", valid)
+    if (valid)
+        document.addEventListener('click', function(event) {
+            handleElementClick(event)
+        });
 });
-
 
 function handleElementClick(event) {
     var clickedElement = event.target;

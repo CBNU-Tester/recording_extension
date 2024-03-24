@@ -1,58 +1,30 @@
+/**
+ * record.js에서 오는 메시지를 받아서 새로운 창을 열고 content.js를 실행하는 스크립트
+ */
+
+
+// 열린 윈도우와 해당 윈도우에 적용된 content.js 스크립트를 추적하기 위한 객체
+let openedWindows = {};
+
+// 새로운 윈도우를 열 때 처리
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     if (request.action === "openNewWindow") {
-        console.log("google")
+        chrome.storage.local.set({"script_valid": true})
+        chrome.storage.local.get(['script_valid'], function(result) {console.log("window open",result)});
+
         chrome.windows.create({url: request.url}, function(window) {
-            let tab = window.tabs[0];
-            console.log(JSON.stringify(tab));
-            chrome.scripting.executeScript({
+            let tab = window.tabs[0]; // 새로운 창의 첫번째 탭의 정보를 가져옴
+            openedWindows[window.id] = tab.id; // 열린 윈도우와 해당 탭을 매핑하여 추적
+            console.log(window.id,tab.id)
+            chrome.scripting.executeScript({ // content.js를 실행
                 target: { tabId: tab.id },
                 files: ['content.js'],
-            }).then(() => {
-                console.log("Script executed");
-            });
+            })
         });
     }
 });
-// function tmp() {
-//     document.addEventListener('click', function(event) {
-//         alert("clicked");
-//         handleElementClick(event)
-//     });
-// }
-// function handleElementClick(event) {
-//     alert("clicked");
-//     var clickedElement = event.target;
-//     var xpath = getXPath(clickedElement);
-//     console.log(xpath)
-//     // make_box(xpath);
-    
-// }
 
-// // 요소의 XPath를 추출하는 함수
-// function getXPath(element) {
-//     if (element.id !== '')
-//         return 'id("' + element.id + '")';
-//     if (element === document.body)
-//         return element.tagName;
-//     var siblings = element.parentNode.childNodes;
-//     for (var i = 0; i < siblings.length; i++) {
-//         var sibling = siblings[i];
-//         if (sibling === element)
-//             return getXPath(element.parentNode) + '/' + element.tagName + '[' + (i + 1) + ']';
-//     }
-// }
-// function make_box(xpath) {
-//     var blackBar = document.createElement('div');
-//     blackBar.style.position = 'fixed';
-//     blackBar.style.top = '0';
-//     blackBar.style.left = '0';
-//     blackBar.style.width = '100%';
-//     blackBar.style.height = '30px';
-//     blackBar.style.backgroundColor = 'black';
-//     blackBar.style.color = 'white';
-//     blackBar.style.padding = '5px';
-//     blackBar.style.boxSizing = 'border-box';
-//     blackBar.style.zIndex = '9999';
-//     blackBar.innerText = 'Current Element XPath: ' + xpath;
-//     document.body.appendChild(blackBar);
-// }
+// 윈도우가 닫힐 때 처리
+chrome.windows.onRemoved.addListener(function(windowId) {
+    chrome.storage.local.set({"script_valid": false})
+});
