@@ -10,8 +10,6 @@ let openedWindows = {};
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     if (request.action === "openNewWindow") {
         chrome.storage.local.set({"script_valid": true})
-        chrome.storage.local.get(['script_valid'], function(result) {console.log("window open",result)});
-
         chrome.windows.create({url: request.url}, function(window) {
             let tab = window.tabs[0]; // 새로운 창의 첫번째 탭의 정보를 가져옴
             openedWindows[window.id] = tab.id; // 열린 윈도우와 해당 탭을 매핑하여 추적

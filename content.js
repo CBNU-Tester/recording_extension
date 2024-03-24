@@ -17,6 +17,17 @@ function handleElementClick(event) {
     var clickedElement = event.target;
     var xpath = getXPath(clickedElement);
     make_box(xpath);
+    $.ajax({
+        type: "POST",
+        url: "https://cbnutester.site/record/",
+        data: xpath,
+        success: function(msg){
+            console.log(msg)
+       },
+       error: function(err){
+            console.log("error : ",err)
+       }
+     });
     
 }
 
