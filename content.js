@@ -6,17 +6,23 @@
 let valid=false; 
 chrome.storage.local.get(["script_valid"], (result) => {
     valid = result.script_valid;
-    console.log("content js ", valid)
     if (valid)
         document.addEventListener('click', function(event) {
             handleElementClick(event)
         });
 });
 
+
+
 function handleElementClick(event) {
     var clickedElement = event.target;
     var xpath = getXPath(clickedElement);
     make_box(xpath);
+    // XPath를 팝업 창에 전달합니다.
+    chrome.runtime.sendMessage({
+        action: "updateXPath",
+        xpath: xpath
+    });
     $.ajax({
         type: "POST",
         url: "https://cbnutester.site/record/",

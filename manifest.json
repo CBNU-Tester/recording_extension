@@ -1,6 +1,6 @@
 {
     "name": "ChromeExtension",
-    "version": "0.1",
+    "version": "1.0",
     "manifest_version": 3,
     "background": {
       "service_worker": "background.js"
@@ -12,19 +12,24 @@
       "alarms",
       "storage",
       "activeTab",
-      "notifications"
+      "notifications",
+      "tabs"
     ],
     "host_permissions": [
       "https://www.google.com/*",
       "https://www.cbnutester.site/*"
     ],
-    "action": {
-      "default_popup": "index.html"
-    },
+    
     "content_scripts": [
       {
         "matches": ["<all_urls>"],
         "js": ["content.js"]
       }
-    ]
+    ],
+    "action": {
+        "default_popup": "index.html",
+        "default_icon": {
+          "16": "images/icon16.png"
+        }
+  }
   }
