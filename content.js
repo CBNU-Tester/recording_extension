@@ -4,6 +4,7 @@
  * @todo 해당 클릭 이벤트 xpath 정보를 서버에 전달
  **/
 let valid=false; 
+let test_case_id=0;
 chrome.storage.local.get(["script_valid"], (result) => {
     valid = result.script_valid;
     if (valid)
@@ -18,23 +19,19 @@ function handleElementClick(event) {
     var clickedElement = event.target;
     var xpath = getXPath(clickedElement);
     make_box(xpath);
+    test_case_id+=1;
+    test_case={
+        "id": test_case_id,
+        "role":"None",
+        "xpath": xpath,
+        "input": "None",
+        "output": "None"
+    }
     // XPath를 팝업 창에 전달합니다.
     chrome.runtime.sendMessage({
         action: "updateXPath",
-        xpath: xpath
+        test_case: test_case
     });
-    $.ajax({
-        type: "POST",
-        url: "https://cbnutester.site/record/",
-        data: xpath,
-        success: function(msg){
-            console.log(msg)
-       },
-       error: function(err){
-            console.log("error : ",err)
-       }
-     });
-    
 }
 
 // 요소의 XPath를 추출하는 함수

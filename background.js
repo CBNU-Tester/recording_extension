@@ -6,6 +6,22 @@
 // 열린 윈도우와 해당 윈도우에 적용된 content.js 스크립트를 추적하기 위한 객체
 let openedWindows = {};  
 
+chrome.action.onClicked.addListener(() => {
+    chrome.system.display.getInfo((displays) => {
+        const display = displays[0];
+        const width = display.workArea.width;
+        const height = display.workArea.height;
+
+        chrome.windows.create({
+            url: chrome.runtime.getURL("index.html"),
+            type: "popup",
+            left: 0,
+            top: 0,
+            width: width,
+            height: height
+        });
+    });
+});
 // 새로운 윈도우를 열 때 처리
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     if (request.action === "openNewWindow") {
