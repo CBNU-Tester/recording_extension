@@ -1,28 +1,37 @@
 /**
  * extension의 record 버튼 클릭 시 실행되는 스크립트
- * @todo 해당 클릭 이벤트 xpath 정보를 extension index.html에 전달
- * @todo 해당 클릭 이벤트 xpath 정보를 서버에 전달
  **/
-let valid=false; 
-let test_case_id=0;
+let test_case_id = 0;
 chrome.storage.local.get(["script_valid"], (result) => {
     valid = result.script_valid;
-    if (valid)
+
+    // 현재 URL을 저장
+    let lastURL = location.href;
+    chrome.storage.local.set({ "lastURL": lastURL });
+    
+    if (valid) {
         document.addEventListener('click', function(event) {
-            handleElementClick(event)
+            handleElementClick(event);
         });
+
+        // URL 변경 감지
+        observeURLChanges(lastURL);
+
+        // 입력 이벤트 리스너 등록
+        document.addEventListener('input', function(event) {
+            handleInputChange(event);
+        });
+    }
 });
-
-
 
 function handleElementClick(event) {
     var clickedElement = event.target;
     var xpath = getXPath(clickedElement);
     make_box(xpath);
-    test_case_id+=1;
-    test_case={
+    test_case_id += 1;
+    let test_case = {
         "id": test_case_id,
-        "role":"None",
+        "role": "None",
         "xpath": xpath,
         "input": "None",
         "output": "None"
@@ -30,6 +39,71 @@ function handleElementClick(event) {
     // XPath를 팝업 창에 전달합니다.
     chrome.runtime.sendMessage({
         action: "updateXPath",
+        test_case: test_case
+    });
+}
+
+function handleInputChange(event) {
+    var inputElement = event.target;
+    var xpath = getXPath(inputElement);
+    test_case_id += 1;
+    let test_case = {
+        "id": test_case_id,
+        "role": "Input",
+        "xpath": xpath,
+        "input": inputElement.value,
+        "output": "None"
+    }
+    chrome.runtime.sendMessage({
+        action: "updateInput",
+        test_case: test_case
+    });
+}
+
+function observeURLChanges(lastURL) {
+    console.log('URL change observer is running');
+
+    // URL 변경 감지를 위해 history 메서드 오버라이드
+    const originalPushState = history.pushState;
+    const originalReplaceState = history.replaceState;
+
+    history.pushState = function(...args) {
+        originalPushState.apply(this, args);
+        handleURLChange();
+    };
+
+    history.replaceState = function(...args) {
+        originalReplaceState.apply(this, args);
+        handleURLChange();
+    };
+
+    window.addEventListener('popstate', handleURLChange);
+
+    function handleURLChange() {
+        const currentURL = location.href;
+        chrome.storage.local.get(["lastURL"], (result) => {
+            const storedLastURL = result.lastURL || lastURL;
+            if (storedLastURL !== currentURL) {
+                lastURL = currentURL;
+                chrome.storage.local.set({ "lastURL": currentURL });
+                recordURLChange(storedLastURL, currentURL);
+            }
+        });
+    }
+}
+
+
+function recordURLChange(pastURL,url) {
+    test_case_id += 1;
+    let test_case = {
+        "id": test_case_id,
+        "role": "URL Change",
+        "xpath": "None",
+        "input": pastURL,
+        "output": url
+    }
+    chrome.runtime.sendMessage({
+        action: "updateURL",
         test_case: test_case
     });
 }

@@ -2,10 +2,10 @@
  * record.js에서 오는 메시지를 받아서 새로운 창을 열고 content.js를 실행하는 스크립트
  */
 
-
 // 열린 윈도우와 해당 윈도우에 적용된 content.js 스크립트를 추적하기 위한 객체
 let openedWindows = {};  
 
+// 크롬 익스텐션 열 때 화면에 채우기
 chrome.action.onClicked.addListener(() => {
     chrome.system.display.getInfo((displays) => {
         const display = displays[0];
