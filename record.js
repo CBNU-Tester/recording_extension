@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const recordButton = document.getElementById('record-btn');
     const sendButton = document.getElementById('send-btn');
     const urlInput = document.getElementById('url-input');
+    const clearButton = document.getElementById('clear-btn');
     // 버튼 클릭 이벤트 리스너
     recordButton.addEventListener('click', function () {
         // 입력 박스의 값 가져오기
@@ -21,7 +22,10 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-
+    clearButton.addEventListener('click', function () {
+        const tableBody = document.querySelector('table tbody');
+        tableBody.innerHTML = '';
+    });
     
 
     // 전송 버튼 클릭 이벤트 리스너
@@ -45,6 +49,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (event.key === 'Enter') {
             event.preventDefault(); // 기본 Enter 동작 방지
             recordButton.click(); // 버튼 클릭 이벤트 트리거
+            clearButton.click();
         }
     });
 });

@@ -22,6 +22,7 @@ chrome.action.onClicked.addListener(() => {
         });
     });
 });
+
 // 새로운 윈도우를 열 때 처리
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     if (request.action === "openNewWindow") {

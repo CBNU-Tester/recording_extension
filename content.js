@@ -1,7 +1,7 @@
 /**
  * extension의 record 버튼 클릭 시 실행되는 스크립트
  **/
-let test_case_id = 0;
+// chrome.storage.local.set({ "script_valid": false });
 chrome.storage.local.get(["script_valid"], (result) => {
     valid = result.script_valid;
 
@@ -28,9 +28,7 @@ function handleElementClick(event) {
     var clickedElement = event.target;
     var xpath = getXPath(clickedElement);
     make_box(xpath);
-    test_case_id += 1;
     let test_case = {
-        "id": test_case_id,
         "role": "None",
         "xpath": xpath,
         "input": "None",
@@ -46,9 +44,7 @@ function handleElementClick(event) {
 function handleInputChange(event) {
     var inputElement = event.target;
     var xpath = getXPath(inputElement);
-    test_case_id += 1;
     let test_case = {
-        "id": test_case_id,
         "role": "Input",
         "xpath": xpath,
         "input": inputElement.value,

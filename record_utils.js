@@ -28,7 +28,8 @@ export function addRowToTable(id, xpath, role, input, output) {
     // 각 셀 생성
     const idCell = document.createElement('th');
     idCell.scope = 'row';
-    idCell.textContent = id;
+    idCell.textContent = getTCid();
+    // idCell.textContent = id;
 
     const roleCell = document.createElement('td');
     roleCell.textContent = role;
@@ -62,16 +63,38 @@ export function addRowToTable(id, xpath, role, input, output) {
 
     // 테이블에 새 행 추가
     tableBody.appendChild(newRow);
-    // DELETE 버튼 클릭 이벤트 리스너 추가
-    const delButton = newRow.querySelector('.del-btn');
-    if (delButton) {
-        delButton.addEventListener('click', (event) => {
-            const row = event.target.closest('tr');
-            if (row) {
-                row.remove();
-            }
-        });
-    }
+
+    const deleteButton = actionCell.querySelector('.del-btn');
+    deleteButton.addEventListener('click', function() {
+        newRow.remove();  // 해당 행을 삭제
+        reSortTCid();  // TCid 재정렬
+    });
 
 }
 
+function reSortTCid() {
+    const tableBody = document.querySelector('table tbody');
+    const rows = tableBody.querySelectorAll('tr');
+
+    rows.forEach((row, index) => {
+        const idCell = row.querySelector('th');
+        idCell.textContent = index + 1;
+    });
+}
+// TCid를 얻어오는 함수
+function getTCid() {
+    const tableBody = document.querySelector('table tbody');
+    const rows = tableBody.querySelectorAll('tr');
+
+    // 테이블이 비어 있는 경우 TCid를 1로 초기화
+    if (rows.length === 0) {
+        return 1;
+    }
+
+    // 마지막 행의 idCell에서 TCid 가져오기
+    const lastRow = rows[rows.length - 1];
+    const lastTCid = parseInt(lastRow.querySelector('th').textContent);
+
+    // TCid에 1을 더해 반환
+    return lastTCid + 1;
+}

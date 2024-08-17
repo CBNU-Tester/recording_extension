@@ -71,8 +71,26 @@
     table-layout: fixed;
 }
 
-.input-group{
+.input-group {
+    display: flex;
+    align-items: center;
     width: 60%;
     max-width: 500px;
     margin: 0 auto;
+}
+
+#url-input {
+    flex-grow: 1; /* 입력 필드가 가능한 넓게 차지하도록 설정 */
+}
+
+.clear-container {
+    margin-left: auto; /* CLEAR 버튼을 오른쪽으로 밀어냄 */
+}
+
+#record-btn {
+    white-space: nowrap; /* RECORD 버튼 내 텍스트가 줄바꿈되지 않도록 설정 */
+}
+
+#clear-btn {
+    white-space: nowrap; /* CLEAR 버튼 내 텍스트가 줄바꿈되지 않도록 설정 */
 }
