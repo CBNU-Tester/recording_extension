@@ -2,17 +2,20 @@ let isListenerActive = false; // 이벤트 리스너 상태를 관리하는 변�
 
 chrome.storage.local.get(["script_valid"], (result) => {
     const valid = result.script_valid;
-
     if (valid) {
-        // 현재 URL을 저장
-        let lastURL = location.href;
-        chrome.storage.local.set({ "lastURL": lastURL });
+        // chrome.storage.local.get(["lastURL"], (result) => {
+        //     if (! result.lastURL)
+        //         chrome.storage.local.set({ "lastURL": location.href });
+        // });
 
+        console.log(chrome.storage.local.get(["lastURL"]));
         // 클릭 이벤트 리스너 등록
         document.addEventListener('click', handleElementClick);
 
-        // // URL 변경 감지
-        // observeURLChanges(lastURL);
+        // URL 변경 이벤트 리스너 등록
+        navigation.addEventListener("navigate",(event)=>{
+            handleURLChange(event);
+        });
 
         // 입력 이벤트 리스너 등록
         if (!isListenerActive) {
@@ -84,52 +87,28 @@ function handleElementClick(event) {
     });
 }
 
-function observeURLChanges(lastURL) {
-    console.log('URL change observer is running');
-
-    // URL 변경 감지를 위해 history 메서드 오버라이드
-    const originalPushState = history.pushState;
-    const originalReplaceState = history.replaceState;
-
-    history.pushState = function(...args) {
-        originalPushState.apply(this, args);
-        handleURLChange();
-    };
-
-    history.replaceState = function(...args) {
-        originalReplaceState.apply(this, args);
-        handleURLChange();
-    };
-
-    window.addEventListener('popstate', handleURLChange);
-
-    function handleURLChange() {
-        const currentURL = location.href;
-        chrome.storage.local.get(["lastURL"], (result) => {
-            const storedLastURL = result.lastURL || lastURL;
-            if (storedLastURL !== currentURL) {
-                lastURL = currentURL;
-                chrome.storage.local.set({ "lastURL": currentURL });
-                recordURLChange(storedLastURL, currentURL);
-
-                // URL 변경 후 이벤트 리스너 상태 초기화
-                if (isListenerActive) {
-                    document.removeEventListener('keydown', handleInputChange);
-                    document.removeEventListener('blur', handleInputChange, true);
-                    isListenerActive = false; // 이벤트 리스너가 제거된 상태
-                }
-                document.addEventListener('keydown', handleInputChange);
-                document.addEventListener('blur', handleInputChange, true);
-                isListenerActive = true; // 이벤트 리스너가 등록된 상태
-            }
-        });
-    }
+function handleURLChange() {
+    console.log("URL changed")
+    const currentURL = location.href;
+    chrome.storage.local.get(["lastURL"], (result) => {
+        console.log("result of lastURL : ",result.lastURL);
+        console.log("currentURL : ",currentURL);
+        if (result.lastURL === undefined) {
+            chrome.storage.local.set({ "lastURL": currentURL });
+            return
+        }
+        const storedLastURL = result.lastURL || lastURL;
+        if (storedLastURL !== currentURL) {
+            lastURL = currentURL;
+            chrome.storage.local.set({ "lastURL": currentURL });
+            console.log("send message URL change",storedLastURL, currentURL);
+            recordURLChange(storedLastURL, currentURL);
+        }
+    });
 }
 
 function recordURLChange(pastURL, url) {
-    test_case_id += 1;
     let test_case = {
-        "id": test_case_id,
         "role": "URL Change",
         "xpath": "None",
         "input": pastURL,

@@ -63,7 +63,7 @@ export function addRowToTable(id, xpath, role, input, output) {
 
     // 테이블에 새 행 추가
     tableBody.appendChild(newRow);
-
+    newRow.scrollIntoView({ behavior: 'smooth', block: 'end' });
     const deleteButton = actionCell.querySelector('.del-btn');
     deleteButton.addEventListener('click', function() {
         newRow.remove();  // 해당 행을 삭제
