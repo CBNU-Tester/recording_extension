@@ -40,7 +40,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 output: test_case.querySelector('#output').textContent
             }
     });
-    // sendDataToDB(table_data);
     console.log(table_data);
     sendDataToServer(table_data);
     });

@@ -1,13 +1,20 @@
 
 export function sendDataToServer(data) {
-    fetch('https://cbnutester.site/record/', { 
+    console.log(JSON.stringify(data));
+    fetch('http://127.0.0.1:8000/record/save/', { 
         method: 'POST',
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(data)
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
     .then(result => {
         console.log('Success:', result);
         alert('Data successfully sent to the server!');
@@ -16,6 +23,7 @@ export function sendDataToServer(data) {
         console.error('Error:', error);
         alert('Failed to send data to the server.');
     });
+    
 }
 
 // 테이블에 새로운 행을 추가하는 함수

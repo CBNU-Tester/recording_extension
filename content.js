@@ -1,28 +1,33 @@
-let isListenerActive = false; // 이벤트 리스너 상태를 관리하는 변수
+// let isListenerActive = false; // 이벤트 리스너 상태를 관리하는 변수
 
 chrome.storage.local.get(["script_valid"], (result) => {
     const valid = result.script_valid;
     if (valid) {
-        // chrome.storage.local.get(["lastURL"], (result) => {
-        //     if (! result.lastURL)
-        //         chrome.storage.local.set({ "lastURL": location.href });
-        // });
 
-        console.log(chrome.storage.local.get(["lastURL"]));
         // 클릭 이벤트 리스너 등록
         document.addEventListener('click', handleElementClick);
-
+        chrome.storage.local.get(["lastURL"], (result) => {
+            console.log("lasturl : ",result.lastURL);
+            console.log("cur : ",location.href);
+            if (result.lastURL === undefined) {
+                // 최초 실행 시 lastURL을 현재 URL로 설정
+                currentURL=location.href;
+                console.log("currentURL : ", currentURL);
+                chrome.storage.local.set({ "lastURL": currentURL });
+                return;
+            }
+        });
         // URL 변경 이벤트 리스너 등록
         navigation.addEventListener("navigate",(event)=>{
             handleURLChange(event);
         });
 
         // 입력 이벤트 리스너 등록
-        if (!isListenerActive) {
+        // if (!isListenerActive) {
             document.addEventListener('keydown', handleInputChange);
             document.addEventListener('blur', handleInputChange, true); // capture 단계에서 blur 이벤트 감지
-            isListenerActive = true; // 이벤트 리스너가 등록된 상태
-        }
+            // isListenerActive = true; // 이벤트 리스너가 등록된 상태
+        // }
     }
 });
 
@@ -87,25 +92,52 @@ function handleElementClick(event) {
     });
 }
 
-function handleURLChange() {
-    console.log("URL changed")
+function handleURLChange(event) {
     const currentURL = location.href;
+
+    // 목적지 URL을 이벤트 객체에서 가져옴
+    const newURL = event.destination.url;
+
     chrome.storage.local.get(["lastURL"], (result) => {
-        console.log("result of lastURL : ",result.lastURL);
-        console.log("currentURL : ",currentURL);
+        console.log("result of lastURL : ", result.lastURL);
+        console.log("currentURL : ", currentURL);
+        console.log("newURL : ", newURL); // 이동할 목적지 URL 출력
+        
         if (result.lastURL === undefined) {
+            // 최초 실행 시 lastURL을 현재 URL로 설정
             chrome.storage.local.set({ "lastURL": currentURL });
-            return
+            return;
         }
-        const storedLastURL = result.lastURL || lastURL;
-        if (storedLastURL !== currentURL) {
-            lastURL = currentURL;
-            chrome.storage.local.set({ "lastURL": currentURL });
-            console.log("send message URL change",storedLastURL, currentURL);
-            recordURLChange(storedLastURL, currentURL);
+
+        const storedLastURL = result.lastURL;
+        if (storedLastURL !== newURL) {
+            chrome.storage.local.set({ "lastURL": newURL });
+            console.log("send message URL change", storedLastURL, newURL);
+            recordURLChange(storedLastURL, newURL); // URL 변경 기록 함수 호출
         }
     });
 }
+
+
+// function handleURLChange() {
+//     console.log("URL changed")
+//     const currentURL = location.href;
+//     chrome.storage.local.get(["lastURL"], (result) => {
+//         console.log("result of lastURL : ",result.lastURL);
+//         console.log("currentURL : ",currentURL);
+//         if (result.lastURL === undefined) {
+//             chrome.storage.local.set({ "lastURL": currentURL });
+//             return
+//         }
+//         const storedLastURL = result.lastURL || lastURL;
+//         if (storedLastURL !== currentURL) {
+//             lastURL = currentURL;
+//             chrome.storage.local.set({ "lastURL": currentURL });
+//             console.log("send message URL change",storedLastURL, currentURL);
+//             recordURLChange(storedLastURL, currentURL);
+//         }
+//     });
+// }
 
 function recordURLChange(pastURL, url) {
     let test_case = {
@@ -120,18 +152,39 @@ function recordURLChange(pastURL, url) {
     });
 }
 
+// function getXPath(element) {
+//     if (element.id !== '')
+//         return 'id("' + element.id + '")';
+//     if (element === document.body)
+//         return element.tagName;
+//     var siblings = element.parentNode.childNodes;
+//     for (var i = 0; i < siblings.length; i++) {
+//         var sibling = siblings[i];
+//         if (sibling === element)
+//             return getXPath(element.parentNode) + '/' + element.tagName + '[' + (i + 1) + ']';
+//     }
+// }
 function getXPath(element) {
-    if (element.id !== '')
-        return 'id("' + element.id + '")';
-    if (element === document.body)
-        return element.tagName;
+    if (element.id !== '') {
+        return '//*[@id="' + element.id + '"]';
+    }
+    if (element === document.body) {
+        return '/html/body';
+    }
+    
+    var index = 1;
     var siblings = element.parentNode.childNodes;
     for (var i = 0; i < siblings.length; i++) {
         var sibling = siblings[i];
-        if (sibling === element)
-            return getXPath(element.parentNode) + '/' + element.tagName + '[' + (i + 1) + ']';
+        if (sibling === element) {
+            return getXPath(element.parentNode) + '/' + element.tagName.toLowerCase() + '[' + index + ']';
+        }
+        if (sibling.nodeType === 1 && sibling.tagName === element.tagName) {
+            index++;
+        }
     }
 }
+
 
 function make_box(xpath) {
     var blackBar = document.createElement('div');

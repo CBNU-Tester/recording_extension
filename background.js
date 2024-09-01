@@ -27,6 +27,7 @@ chrome.action.onClicked.addListener(() => {
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     if (request.action === "openNewWindow") {
         chrome.storage.local.set({"script_valid": true})
+        chrome.storage.local.set({"lastURL": request.url})
         chrome.windows.create(
             {
                 url: request.url,
