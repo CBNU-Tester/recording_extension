@@ -5,10 +5,8 @@ chrome.storage.local.get(["script_valid"], (result) => {
     if (valid) {
 
         // 클릭 이벤트 리스너 등록
-        document.addEventListener('click', handleElementClick);
         chrome.storage.local.get(["lastURL"], (result) => {
-            console.log("lasturl : ",result.lastURL);
-            console.log("cur : ",location.href);
+            console.log("on storage url : ", result.lastURL);
             if (result.lastURL === undefined) {
                 // 최초 실행 시 lastURL을 현재 URL로 설정
                 currentURL=location.href;
@@ -17,60 +15,66 @@ chrome.storage.local.get(["script_valid"], (result) => {
                 return;
             }
         });
-        // URL 변경 이벤트 리스너 등록
-        navigation.addEventListener("navigate",(event)=>{
-            handleURLChange(event);
-        });
+        document.addEventListener('click', handleElementClick,true);
+        navigation.addEventListener("navigate",(event)=>{handleURLChange(event);}); // url change event listener
+        document.addEventListener('keydown', handleInputChange);
+        document.addEventListener('focus', handleFocus);
+        document.addEventListener('blur', handleInputChange, false); // capture 단계에서 blur 이벤트 감지
 
-        // 입력 이벤트 리스너 등록
-        // if (!isListenerActive) {
-            document.addEventListener('keydown', handleInputChange);
-            document.addEventListener('blur', handleInputChange, true); // capture 단계에서 blur 이벤트 감지
-            // isListenerActive = true; // 이벤트 리스너가 등록된 상태
-        // }
     }
 });
-
+function handleFocus(event) {
+    const inputElement = event.target;
+    console.log("Focus event detected on: ", inputElement);
+}
 function handleInputChange(event) {
     const inputElement = event.target;
+    console.log("Event type:  Event Key : ", event.type,event.key);
+    console.log("Event target: ", inputElement);
+    console.log("Event target target: ", inputElement.tagName);
 
+    const xpath = getXPath(inputElement);
+    make_box(xpath);
     // keydown 이벤트에서 Enter 키 감지 및 blur 이벤트 감지
-    if (event.type === 'keydown' && event.key !== 'Enter') {
+    if (event.type === 'keydown' && event.key !== 'Enter' && event.keyCode!==9) {
+        console.log('Keydown event detected continue');
         return;
     }
 
     // 입력 요소만 처리
     if (inputElement.tagName !== 'INPUT' && inputElement.tagName !== 'TEXTAREA') {
+        console.log('Not an input element');
         return;
     }
 
-    const xpath = getXPath(inputElement);
-    make_box(xpath);
-
-    function sendMessage() {
-        const test_case = {
-            "role": "Input",
-            "xpath": xpath,
-            "input": inputElement.value,
-            "output": "None"
-        };
-
-        chrome.runtime.sendMessage({
-            action: "updateInput",
-            test_case: test_case
-        });
-    }
 
     // Enter 키를 누르거나 blur 이벤트가 발생하면 메시지 전송
-    if (event.type === 'keydown' && event.key === 'Enter') {
-        sendMessage();
+    if (event.type === 'keydown' && event.keyCode === 13) {
+        console.log('Enter key detected');
+        sendMessage(xpath, inputElement.value);
     } 
-    else if (event.type === 'blur') {
-        console.log('Blur event detected');
-        sendMessage();
+    if(event.type==='keydown' && event.keyCode===9){
+        console.log('Tab key detected');
+        sendMessage(xpath, inputElement.value);
     }
-    document.removeEventListener('keydown', handleInputChange);
-    document.removeEventListener('blur', handleInputChange, true);
+    if (event.type === 'blur') {
+        console.log('Blur event detected');
+        sendMessage(xpath, inputElement.value);
+    }
+}
+
+function sendMessage(xpath, value) {
+    const test_case = {
+        "role": "Input",
+        "xpath": xpath,
+        "input": value,
+        "output": "None"
+    };
+
+    chrome.runtime.sendMessage({
+        action: "updateInput",
+        test_case: test_case
+    });
 }
 
 function handleElementClick(event) {
@@ -90,16 +94,18 @@ function handleElementClick(event) {
         action: "updateXPath",
         test_case: test_case
     });
+
 }
 
 function handleURLChange(event) {
+    console.log('URL changed');
     const currentURL = location.href;
 
     // 목적지 URL을 이벤트 객체에서 가져옴
     const newURL = event.destination.url;
 
     chrome.storage.local.get(["lastURL"], (result) => {
-        console.log("result of lastURL : ", result.lastURL);
+        console.log("storage url : ", result.lastURL);
         console.log("currentURL : ", currentURL);
         console.log("newURL : ", newURL); // 이동할 목적지 URL 출력
         
@@ -119,27 +125,8 @@ function handleURLChange(event) {
 }
 
 
-// function handleURLChange() {
-//     console.log("URL changed")
-//     const currentURL = location.href;
-//     chrome.storage.local.get(["lastURL"], (result) => {
-//         console.log("result of lastURL : ",result.lastURL);
-//         console.log("currentURL : ",currentURL);
-//         if (result.lastURL === undefined) {
-//             chrome.storage.local.set({ "lastURL": currentURL });
-//             return
-//         }
-//         const storedLastURL = result.lastURL || lastURL;
-//         if (storedLastURL !== currentURL) {
-//             lastURL = currentURL;
-//             chrome.storage.local.set({ "lastURL": currentURL });
-//             console.log("send message URL change",storedLastURL, currentURL);
-//             recordURLChange(storedLastURL, currentURL);
-//         }
-//     });
-// }
-
 function recordURLChange(pastURL, url) {
+    
     let test_case = {
         "role": "URL Change",
         "xpath": "None",
@@ -152,18 +139,6 @@ function recordURLChange(pastURL, url) {
     });
 }
 
-// function getXPath(element) {
-//     if (element.id !== '')
-//         return 'id("' + element.id + '")';
-//     if (element === document.body)
-//         return element.tagName;
-//     var siblings = element.parentNode.childNodes;
-//     for (var i = 0; i < siblings.length; i++) {
-//         var sibling = siblings[i];
-//         if (sibling === element)
-//             return getXPath(element.parentNode) + '/' + element.tagName + '[' + (i + 1) + ']';
-//     }
-// }
 function getXPath(element) {
     if (element.id !== '') {
         return '//*[@id="' + element.id + '"]';

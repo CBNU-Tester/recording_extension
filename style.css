@@ -79,6 +79,7 @@
     margin: 0 auto;
 }
 
+
 #url-input {
     flex-grow: 1; /* 입력 필드가 가능한 넓게 차지하도록 설정 */
 }
@@ -93,4 +94,9 @@
 
 #clear-btn {
     white-space: nowrap; /* CLEAR 버튼 내 텍스트가 줄바꿈되지 않도록 설정 */
+}
+
+#test-title{
+    width: 50%;
+    
 }

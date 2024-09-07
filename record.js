@@ -30,6 +30,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // 전송 버튼 클릭 이벤트 리스너
     sendButton.addEventListener('click', ()=>{
+        const web_url=document.getElementById('url-input').value;
+        const test_title=document.getElementById('test-title').value;
         const test_cases=document.querySelectorAll('table tbody tr');
         const table_data=Array.from(test_cases).map((test_case)=>{;
             return{
@@ -41,7 +43,12 @@ document.addEventListener('DOMContentLoaded', function () {
             }
     });
     console.log(table_data);
-    sendDataToServer(table_data);
+    const dataToSend={
+        url: web_url,
+        title: test_title,
+        test_cases: table_data
+    }
+    sendDataToServer(dataToSend);
     });
     // 입력 박스에서 Enter 키 눌렀을 때
     urlInput.addEventListener('keydown', function (event) {
@@ -67,6 +74,24 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     
     if (message.action==="updateURL"){
         let test_case=message.test_case;
-        addRowToTable(test_case.id, test_case.xpath, test_case.role, test_case.input, test_case.output);
+        xpath=urlGetXpath();
+        addRowToTable(test_case.id, xpath, test_case.role, test_case.input, test_case.output);
     }
 });
+
+function urlGetXpath()
+{
+    const tableBody = document.querySelector('table tbody');
+    const lastRow=tableBody.lastElementChild;
+    if (lastRow) {
+        const roleCell = lastRow.querySelector('td:nth-child(2)');
+        if (roleCell && roleCell.textContent.trim() === 'Click') {
+            const xpathCell = lastRow.querySelector('td:nth-child(3)');
+            const xpathValue = xpathCell ? xpathCell.textContent.trim() : null;
+            if (xpathValue) {
+                console.log('XPATH of the last Click event:', xpathValue);
+            }
+        }
+    }
+    return xpathValue;
+}
