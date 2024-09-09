@@ -74,24 +74,31 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     
     if (message.action==="updateURL"){
         let test_case=message.test_case;
-        xpath=urlGetXpath();
+        const xpath=urlGetXpath();
         addRowToTable(test_case.id, xpath, test_case.role, test_case.input, test_case.output);
     }
 });
 
-function urlGetXpath()
-{
+function urlGetXpath() {
     const tableBody = document.querySelector('table tbody');
-    const lastRow=tableBody.lastElementChild;
-    if (lastRow) {
-        const roleCell = lastRow.querySelector('td:nth-child(2)');
-        if (roleCell && roleCell.textContent.trim() === 'Click') {
-            const xpathCell = lastRow.querySelector('td:nth-child(3)');
-            const xpathValue = xpathCell ? xpathCell.textContent.trim() : null;
-            if (xpathValue) {
-                console.log('XPATH of the last Click event:', xpathValue);
+    let xpathValue = null; // 함수 시작 부분에 변수 정의
+
+    if (tableBody) {
+        const lastRow = tableBody.lastElementChild;
+        if (lastRow) {
+            const roleCell = lastRow.querySelector('td:nth-child(2)');
+            console.log("get xpath condition : ", roleCell, roleCell.textContent.trim());
+            if (roleCell && roleCell.textContent.trim() === 'Click') {
+                const xpathCell = lastRow.querySelector('td:nth-child(3)');
+                console.log("CELL : ", xpathCell);
+                xpathValue = xpathCell ? xpathCell.textContent.trim() : null;
+                console.log("XPATH VALUE : ", xpathValue);
+                if (xpathValue) {
+                    console.log('XPATH of the last Click event:', xpathValue);
+                }
             }
         }
     }
+    console.log('XPATH:', xpath)
     return xpathValue;
 }
