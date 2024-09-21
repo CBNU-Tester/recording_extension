@@ -7,9 +7,6 @@
     },
     "permissions": [
       "scripting",
-      "identity",
-      "identity.email",
-      "alarms",
       "storage",
       "activeTab",
       "notifications",
