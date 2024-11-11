@@ -1,7 +1,7 @@
 
 export function sendDataToServer(data) {
     console.log(JSON.stringify(data));
-    fetch('http://127.0.0.1:8000/record/save/', { 
+    fetch('http://localhost:8000/record/save/', { 
         method: 'POST',
         credentials: 'include',
         headers: {

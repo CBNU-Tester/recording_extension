@@ -83,6 +83,7 @@ function handleElementClick(event) {
     const clickedElement = event.target;
     const xpath = getXPath(clickedElement);
     make_box(xpath);
+
     const test_case = {
         "role": "Click",
         "xpath": xpath,
