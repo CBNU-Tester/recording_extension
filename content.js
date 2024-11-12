@@ -140,7 +140,7 @@ function recordURLChange(pastURL, url) {
     });
 }
 
-function getXPath(element) {
+function getXPath2(element) {
     if (element.id !== '') {
         return '//*[@id="' + element.id + '"]';
     }
@@ -160,6 +160,25 @@ function getXPath(element) {
         }
     }
 }
+function getXPath(elt) {
+    var path = '';
+    for (; elt && elt.nodeType == 1; elt = elt.parentNode) {
+        var idx = getElementIdx(elt);
+        var xname = elt.tagName.toLowerCase();
+        if (idx > 1) xname += '[' + idx + ']';
+        path = '/' + xname + path;
+    }
+    return path;
+}
+
+function getElementIdx(elt) {
+    var count = 1;
+    for (var sib = elt.previousSibling; sib; sib = sib.previousSibling) {
+        if (sib.nodeType == 1 && sib.tagName == elt.tagName) count++;
+    }
+    return count;
+}
+
 
 
 function make_box(xpath) {
