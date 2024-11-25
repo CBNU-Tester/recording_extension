@@ -75,9 +75,25 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     if (message.action==="updateURL"){
         let test_case=message.test_case;
         const xpath=urlGetXpath();
-        addRowToTable(test_case.id, xpath, test_case.role, test_case.input, test_case.output);
+        if (xpath !== null) {
+            removeDuplicateXPath(xpath);
+            addRowToTable(test_case.id, xpath, test_case.role, test_case.input, test_case.output);
+        }
     }
 });
+
+function removeDuplicateXPath(xpath) {
+    const tableBody = document.querySelector('table tbody');
+    if (tableBody) {
+        const rows = tableBody.querySelectorAll('tr');
+        rows.forEach((row, index) => {
+            const xpathCell = row.querySelector('td:nth-child(3)');
+            if (xpathCell && xpathCell.textContent.trim() === xpath) {
+                tableBody.removeChild(row);
+            }
+        });
+    }
+}
 
 function urlGetXpath() {
     const tableBody = document.querySelector('table tbody');
